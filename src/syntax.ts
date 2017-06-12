@@ -41,6 +41,7 @@ export const Syntax = {
     MemberExpression: 'MemberExpression',
     MetaProperty: 'MetaProperty',
     MethodDefinition: 'MethodDefinition',
+    N1qlStatement:'N1qlStatement',
     NewExpression: 'NewExpression',
     ObjectExpression: 'ObjectExpression',
     ObjectPattern: 'ObjectPattern',

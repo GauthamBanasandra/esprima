@@ -1,10 +1,10 @@
-import { assert } from './assert';
-import { ErrorHandler } from './error-handler';
-import { Messages } from './messages';
+import {assert} from './assert';
+import {ErrorHandler} from './error-handler';
+import {Messages} from './messages';
 import * as Node from './nodes';
-import { Comment, RawToken, Scanner, SourceLocation } from './scanner';
-import { Syntax } from './syntax';
-import { Token, TokenName } from './token';
+import {Comment, RawToken, Scanner, SourceLocation} from './scanner';
+import {Syntax} from './syntax';
+import {Token, TokenName} from './token';
 
 interface Config {
     range: boolean;
@@ -172,9 +172,9 @@ export class Parser {
     throwError(messageFormat: string, ...values): void {
         const args = Array.prototype.slice.call(arguments, 1);
         const msg = messageFormat.replace(/%(\d)/g, (whole, idx) => {
-            assert(idx < args.length, 'Message reference must be in range');
-            return args[idx];
-        }
+                assert(idx < args.length, 'Message reference must be in range');
+                return args[idx];
+            }
         );
 
         const index = this.lastMarker.index;
@@ -186,9 +186,9 @@ export class Parser {
     tolerateError(messageFormat, ...values) {
         const args = Array.prototype.slice.call(arguments, 1);
         const msg = messageFormat.replace(/%(\d)/g, (whole, idx) => {
-            assert(idx < args.length, 'Message reference must be in range');
-            return args[idx];
-        }
+                assert(idx < args.length, 'Message reference must be in range');
+                return args[idx];
+            }
         );
 
         const index = this.lastMarker.index;
@@ -315,7 +315,7 @@ export class Parser {
         if (token.type === Token.RegularExpression) {
             const pattern = token.pattern as string;
             const flags = token.flags as string;
-            t.regex = { pattern, flags };
+            t.regex = {pattern, flags};
         }
 
         return t;
@@ -919,7 +919,7 @@ export class Parser {
 
         this.expect('{');
         const properties: Node.ObjectExpressionProperty[] = [];
-        const hasProto = { value: false };
+        const hasProto = {value: false};
         while (!this.match('}')) {
             properties.push(this.match('...') ? this.parseSpreadElement() : this.parseObjectProperty(hasProto));
             if (!this.match('}')) {
@@ -941,7 +941,7 @@ export class Parser {
         const raw = token.value as string;
         const cooked = token.cooked as string;
 
-        return this.finalize(node, new Node.TemplateElement({ raw, cooked }, token.tail as boolean));
+        return this.finalize(node, new Node.TemplateElement({raw, cooked}, token.tail as boolean));
     }
 
     parseTemplateElement(): Node.TemplateElement {
@@ -954,7 +954,7 @@ export class Parser {
         const raw = token.value as string;
         const cooked = token.cooked as string;
 
-        return this.finalize(node, new Node.TemplateElement({ raw, cooked }, token.tail as boolean));
+        return this.finalize(node, new Node.TemplateElement({raw, cooked}, token.tail as boolean));
     }
 
     parseTemplateLiteral(): Node.TemplateLiteral {
@@ -1433,6 +1433,8 @@ export class Parser {
             this.context.isBindingElement = false;
         } else if (this.context.await && this.matchContextualKeyword('await')) {
             expr = this.parseAwaitExpression();
+        } else if (this.lookahead.value === 'select') {
+            expr = this.parseN1qlStatement();
         } else {
             expr = this.parseUpdateExpression();
         }
@@ -1812,7 +1814,7 @@ export class Parser {
                     }
                     break;
                 case 'const':
-                    statement = this.parseLexicalDeclaration({ inFor: false });
+                    statement = this.parseLexicalDeclaration({inFor: false});
                     break;
                 case 'function':
                     statement = this.parseFunctionDeclaration();
@@ -1821,7 +1823,7 @@ export class Parser {
                     statement = this.parseClassDeclaration();
                     break;
                 case 'let':
-                    statement = this.isLexicalDeclaration() ? this.parseLexicalDeclaration({ inFor: false }) : this.parseStatement();
+                    statement = this.isLexicalDeclaration() ? this.parseLexicalDeclaration({inFor: false}) : this.parseStatement();
                     break;
                 default:
                     statement = this.parseStatement();
@@ -2106,7 +2108,7 @@ export class Parser {
     }
 
     parseVariableDeclarationList(options): Node.VariableDeclarator[] {
-        const opt: DeclarationOptions = { inFor: options.inFor };
+        const opt: DeclarationOptions = {inFor: options.inFor};
 
         const list: Node.VariableDeclarator[] = [];
         list.push(this.parseVariableDeclaration(opt));
@@ -2121,7 +2123,7 @@ export class Parser {
     parseVariableStatement(): Node.VariableDeclaration {
         const node = this.createNode();
         this.expectKeyword('var');
-        const declarations = this.parseVariableDeclarationList({ inFor: false });
+        const declarations = this.parseVariableDeclarationList({inFor: false});
         this.consumeSemicolon();
 
         return this.finalize(node, new Node.VariableDeclaration(declarations, 'var'));
@@ -2252,7 +2254,7 @@ export class Parser {
 
                 const previousAllowIn = this.context.allowIn;
                 this.context.allowIn = false;
-                const declarations = this.parseVariableDeclarationList({ inFor: true });
+                const declarations = this.parseVariableDeclarationList({inFor: true});
                 this.context.allowIn = previousAllowIn;
 
                 if (declarations.length === 1 && this.matchKeyword('in')) {
@@ -2289,7 +2291,7 @@ export class Parser {
                 } else {
                     const previousAllowIn = this.context.allowIn;
                     this.context.allowIn = false;
-                    const declarations = this.parseBindingList(kind, { inFor: true });
+                    const declarations = this.parseBindingList(kind, {inFor: true});
                     this.context.allowIn = previousAllowIn;
 
                     if (declarations.length === 1 && declarations[0].init === null && this.matchKeyword('in')) {
@@ -2429,6 +2431,18 @@ export class Parser {
         }
 
         return this.finalize(node, new Node.BreakStatement(label));
+    }
+
+    parseN1qlStatement(): Node.N1qlStatement {
+        const node = this.createNode();
+        this.expectKeyword('select');
+        let n1qlBody: any[] = [];
+
+        while (this.lookahead.value != ';') {
+            n1qlBody.push(this.convertToken(this.nextToken()));
+        }
+
+        return this.finalize(node, new Node.N1qlStatement('select', n1qlBody));
     }
 
     // https://tc39.github.io/ecma262/#sec-return-statement
@@ -2733,6 +2747,9 @@ export class Parser {
                     case 'with':
                         statement = this.parseWithStatement();
                         break;
+                    case 'select':
+                        statement = this.parseN1qlStatement();
+                        break;
                     default:
                         statement = this.parseExpressionStatement();
                         break;
@@ -2807,7 +2824,12 @@ export class Parser {
 
         /* istanbul ignore next */
         if (typeof Object.defineProperty === 'function') {
-            Object.defineProperty(options.paramSet, key, { value: true, enumerable: true, writable: true, configurable: true });
+            Object.defineProperty(options.paramSet, key, {
+                value: true,
+                enumerable: true,
+                writable: true,
+                configurable: true
+            });
         } else {
             options.paramSet[key] = true;
         }
@@ -3297,7 +3319,7 @@ export class Parser {
 
     parseClassElementList(): Node.Property[] {
         const body: Node.Property[] = [];
-        const hasConstructor = { value: false };
+        const hasConstructor = {value: false};
 
         this.expect('{');
         while (!this.match('}')) {
@@ -3580,7 +3602,7 @@ export class Parser {
             switch (this.lookahead.value) {
                 case 'let':
                 case 'const':
-                    declaration = this.parseLexicalDeclaration({ inFor: false });
+                    declaration = this.parseLexicalDeclaration({inFor: false});
                     break;
                 case 'var':
                 case 'class':

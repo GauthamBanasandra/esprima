@@ -356,7 +356,7 @@ export class Scanner {
                     (id === 'class') || (id === 'super');
             case 6:
                 return (id === 'return') || (id === 'typeof') || (id === 'delete') ||
-                    (id === 'switch') || (id === 'export') || (id === 'import');
+                    (id === 'switch') || (id === 'export') || (id === 'import') || (id === 'select');
             case 7:
                 return (id === 'default') || (id === 'finally') || (id === 'extends');
             case 8:

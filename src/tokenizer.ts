@@ -1,6 +1,6 @@
-import { ErrorHandler } from './error-handler';
-import { Comment, Scanner, SourceLocation } from './scanner';
-import { Token, TokenName } from './token';
+import {ErrorHandler} from './error-handler';
+import {Comment, Scanner, SourceLocation} from './scanner';
+import {Token, TokenName} from './token';
 
 type ReaderEntry = string | null;
 
@@ -28,14 +28,14 @@ class Reader {
     // A function following one of those tokens is an expression.
     beforeFunctionExpression(t: string): boolean {
         return ['(', '{', '[', 'in', 'typeof', 'instanceof', 'new',
-            'return', 'case', 'delete', 'throw', 'void',
-            // assignment operators
-            '=', '+=', '-=', '*=', '**=', '/=', '%=', '<<=', '>>=', '>>>=',
-            '&=', '|=', '^=', ',',
-            // binary/unary operators
-            '+', '-', '*', '**', '/', '%', '++', '--', '<<', '>>', '>>>', '&',
-            '|', '^', '!', '~', '&&', '||', '?', ':', '===', '==', '>=',
-            '<=', '<', '>', '!=', '!=='].indexOf(t) >= 0;
+                'return', 'case', 'delete', 'throw', 'void',
+                // assignment operators
+                '=', '+=', '-=', '*=', '**=', '/=', '%=', '<<=', '>>=', '>>>=',
+                '&=', '|=', '^=', ',',
+                // binary/unary operators
+                '+', '-', '*', '**', '/', '%', '++', '--', '<<', '>>', '>>>', '&',
+                '|', '^', '!', '~', '&&', '||', '?', ':', '===', '==', '>=',
+                '<=', '<', '>', '!=', '!=='].indexOf(t) >= 0;
     }
 
     // Determine if forward slash (/) is an operator or part of a regular expression
@@ -181,7 +181,7 @@ export class Tokenizer {
                 if (token.type === Token.RegularExpression) {
                     const pattern = token.pattern as string;
                     const flags = token.flags as string;
-                    entry.regex = { pattern, flags };
+                    entry.regex = {pattern, flags};
                 }
 
                 this.buffer.push(entry);
