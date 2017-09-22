@@ -1433,8 +1433,26 @@ export class Parser {
             this.context.isBindingElement = false;
         } else if (this.context.await && this.matchContextualKeyword('await')) {
             expr = this.parseAwaitExpression();
-        } else if (this.lookahead.value === 'select') {
-            expr = this.parseN1qlStatement();
+        } else if (
+            this.lookahead.value === 'alter' ||
+            this.lookahead.value === 'build' ||
+            this.lookahead.value === 'create' ||
+            this.lookahead.value === 'delete' ||
+            this.lookahead.value === 'drop' ||
+            this.lookahead.value === 'execute' ||
+            this.lookahead.value === 'explain' ||
+            this.lookahead.value === 'grant' ||
+            this.lookahead.value === 'infer' ||
+            this.lookahead.value === 'insert' ||
+            this.lookahead.value === 'merge' ||
+            this.lookahead.value === 'prepare' ||
+            this.lookahead.value === 'rename' ||
+            this.lookahead.value === 'select' ||
+            this.lookahead.value === 'revoke' ||
+            this.lookahead.value === 'update' ||
+            this.lookahead.value === 'upsert'
+        ) {
+            expr = this.parseN1qlStatement(this.lookahead.value);
         } else {
             expr = this.parseUpdateExpression();
         }
@@ -2433,16 +2451,18 @@ export class Parser {
         return this.finalize(node, new Node.BreakStatement(label));
     }
 
-    parseN1qlStatement(): Node.N1qlStatement {
+    parseN1qlStatement(n1ql_value): Node.N1qlStatement {
         const node = this.createNode();
-        this.expectKeyword('select');
+        // this.expectKeyword(n1ql_value);
+        // TODO : Need to change this later.
+        this.nextToken();
         let n1qlBody: any[] = [];
 
         while (this.lookahead.value != ';') {
             n1qlBody.push(this.convertToken(this.nextToken()));
         }
 
-        return this.finalize(node, new Node.N1qlStatement('select', n1qlBody));
+        return this.finalize(node, new Node.N1qlStatement(n1ql_value, n1qlBody));
     }
 
     // https://tc39.github.io/ecma262/#sec-return-statement
@@ -2747,8 +2767,24 @@ export class Parser {
                     case 'with':
                         statement = this.parseWithStatement();
                         break;
+                    case 'alter':
+                    case 'build':
+                    case 'create':
+                    case 'delete':
+                    case 'drop':
+                    case 'execute':
+                    case 'explain':
+                    case 'grant':
+                    case 'infer':
+                    case 'insert':
+                    case 'merge':
+                    case 'prepare':
+                    case 'rename':
                     case 'select':
-                        statement = this.parseN1qlStatement();
+                    case 'revoke':
+                    case 'update':
+                    case 'upsert':
+                        statement = this.parseN1qlStatement(this.lookahead.value);
                         break;
                     default:
                         statement = this.parseExpressionStatement();
